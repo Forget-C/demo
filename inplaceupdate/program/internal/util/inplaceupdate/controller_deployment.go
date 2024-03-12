@@ -24,7 +24,7 @@ const defaultRequeueAfter = time.Second * 30
 
 type RealDeploymentControl struct {
 	Client           client.Client
-	reconcileFunc    func(ctx context.Context, inplaceUpdate types.NamespacedName, deployment types.NamespacedName) (ctrl.Result, error)
+	reconcileFunc    func(ctx context.Context, inplaceUpdate types.NamespacedName) (ctrl.Result, error)
 	statusUpdater    StatusUpdater
 	patchPodFunc     func(obj *corev1.Pod, latestStatus map[string]*corev1.ContainerStatus, updateSpc *UpdateSpce) (*corev1.Pod, error)
 	patchProcessFunc func(obj *v1.InplaceUpdate, finishedPods, failedPods []*corev1.Pod) (*v1.InplaceUpdate, error)
@@ -43,11 +43,11 @@ func NewRealDeploymentControl(client client.Client) *RealDeploymentControl {
 	return controller
 }
 
-func (r *RealDeploymentControl) Reconcile(ctx context.Context, inplaceUpdate types.NamespacedName, deployment types.NamespacedName) (ctrl.Result, error) {
-	return r.reconcileFunc(ctx, inplaceUpdate, deployment)
+func (r *RealDeploymentControl) Reconcile(ctx context.Context, inplaceUpdate types.NamespacedName) (ctrl.Result, error) {
+	return r.reconcileFunc(ctx, inplaceUpdate)
 }
 
-func (r *RealDeploymentControl) doReconcile(ctx context.Context, inplaceUpdate types.NamespacedName, deployment types.NamespacedName) (ctrl.Result, error) {
+func (r *RealDeploymentControl) doReconcile(ctx context.Context, inplaceUpdate types.NamespacedName) (ctrl.Result, error) {
 	i := &v1.InplaceUpdate{}
 	if err := r.Client.Get(ctx, inplaceUpdate, i); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -65,7 +65,7 @@ func (r *RealDeploymentControl) doReconcile(ctx context.Context, inplaceUpdate t
 	newStatus := &v1.InplaceUpdateStatus{
 		StartTime: &metav1.Time{},
 	}
-	if err := r.Client.Get(ctx, deployment, d); err != nil {
+	if err := r.Client.Get(ctx, types.NamespacedName{Namespace: i.Namespace, Name: i.Spec.TargetReference.Name}, d); err != nil {
 		if apierrors.IsNotFound(err) {
 			newStatus.Phase = v1.InplaceUpdatePhaseFailed
 			newStatus.CompletionTime = &metav1.Time{}
