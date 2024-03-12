@@ -1,0 +1,27 @@
+# permissions for end users to view inplaceupdates.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: inplaceupdate-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: program
+    app.kubernetes.io/part-of: program
+    app.kubernetes.io/managed-by: kustomize
+  name: inplaceupdate-viewer-role
+rules:
+- apiGroups:
+  - apps.demo.cyisme.top
+  resources:
+  - inplaceupdates
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps.demo.cyisme.top
+  resources:
+  - inplaceupdates/status
+  verbs:
+  - get

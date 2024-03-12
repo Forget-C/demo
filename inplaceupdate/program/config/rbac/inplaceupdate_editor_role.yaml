@@ -1,0 +1,31 @@
+# permissions for end users to edit inplaceupdates.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: inplaceupdate-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: program
+    app.kubernetes.io/part-of: program
+    app.kubernetes.io/managed-by: kustomize
+  name: inplaceupdate-editor-role
+rules:
+- apiGroups:
+  - apps.demo.cyisme.top
+  resources:
+  - inplaceupdates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps.demo.cyisme.top
+  resources:
+  - inplaceupdates/status
+  verbs:
+  - get
